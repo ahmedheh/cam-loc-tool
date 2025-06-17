@@ -17,8 +17,10 @@
 
     if (imageBlob) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const file = new File([imageBlob], `image_${timestamp}.jpg`, { type: "image/jpeg" });
+      const timestamp = Date.now();
+      const file = new File([imageBlob], `cam_${timestamp}.jpg`, { type: "image/jpeg" });
       formData.append("image", file);
+
     }
 
     await fetch("server.php", {

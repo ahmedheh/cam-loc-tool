@@ -4,7 +4,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['lat']) && isset($_GET['l
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['image'])) {
-    $filename = basename($_FILES['image']['name']);
-    move_uploaded_file($_FILES['image']['tmp_name'], "logs/" . $filename);
+    $originalName = $_FILES['image']['name'];
+    $targetPath = "logs/" . basename($originalName);
+    move_uploaded_file($_FILES['image']['tmp_name'], $targetPath);
 }
 ?>
